@@ -70,11 +70,13 @@
         <div class="col-sm-3">
             <h1>Messages</h1>
             You have <strong><span id="currentCount">0</span></strong> new messages
-            <div id="fetch" class="row">Get <input type="text" id="fetchCount" value="5"> next messages<button id="fetchNext">Get</button></div>
+            <div id="fetch" class="row"><button id="fetchNext">Get</button> <input type="text" id="fetchCount" value="5"> next messages</div>
             <div id="messageContainer"></div>
         </div>
         <!--/right-->
         <hr>
+
+
     </div><!--/container-fluid-->
     <!-- script references -->
     <input type="hidden" id="user" value="@Model.UserName" />
@@ -102,8 +104,8 @@
             var number = $("#fetchCount")[0].value;
             var user = $("#user")[0].value;
             $.ajax({
-                url: '/api/notificationapi/messages/' + user + '/' + number,
-                type: "POST",
+                url: '/api/notificationapi/messages?userName=' + user + '&count=' + number,
+                type: "GET",
                 contentType: 'application/json; charset=utf-8',
                 success: function (data, status, xhr) {
                     UpdateMessages(data);
@@ -123,15 +125,16 @@
                 container.removeChild(container.lastChild);
             }
 
-            displayMessages(data.entries, jqueryContainer);
+            displayMessages(data, jqueryContainer);
         }
 
         function displayMessages(items, container) {
             var index, commentIndex;
             for (index = 0; index < items.length; ++index) {
-                var entry = '<div class="row" id=e' + items[index].id + '"><div class="col-xs-12"><h2>' + items[index].subject + '</h2><p>' +
-                    items[index].body + '</p><p><i>' + items[index].saved + '</i></p></div>' +
-                    '<div>(by: ' + items[index].author + ')</div>';
+                var entry = '<div class="row" id=message_' + items[index].Id + '"><div class="col-xs-8"><h3>' + items[index].Subject + '</h3><p>' +
+                    items[index].Content + '</p><p><i>' + items[index].Saved + '</i> (by: ' + items[index].Sender + ')</p></div>' +
+                    '<div class="col-xs-4"><div style="padding-top:2em">Mark as read   <input type="checkbox" /></div></div>';
+                    
                 container.prepend(entry);
             }
         }

@@ -22,10 +22,26 @@ namespace NotificationTest.Controllers
         }
 
         [ActionName("messages")]
-        public IEnumerable<UserNotificationMessage> Get(string userName, int count)
+        public IEnumerable<NotificationMessageViewModel> Get(string userName, int count)
         {
             int totalCount;
-            return _notifier.GetUserNotifications(new UserNotificationsQuery() { Read = false, User = new NotificationUser() { UserName = userName } }, 1, count, out totalCount);
+            //return _notifier.GetUserNotifications(new UserNotificationsQuery() { Read = false, User = new NotificationUser() { UserName = userName } }, 1, count, out totalCount);
+
+            return new[]{ new NotificationMessageViewModel(){
+                Content = "this is some text",
+                Subject = "A message",
+                Saved = DateTime.Now.AddHours(-2).ToString("{yyyy/MM/dd H:mm:ss}"),
+                Id = 1,
+                Sender = "kalle"
+                }
+                , new NotificationMessageViewModel(){
+                Content = "this is some other text",
+                Subject = "Another message",
+                Saved = DateTime.Now.AddHours(-3).ToString("{yyyy/MM/dd H:mm:ss}"),
+                Id = 12,
+                Sender =  "bertil"
+                }
+            };
         }
 
         [ActionName("notify")]
