@@ -1,0 +1,119 @@
+﻿@model NotificationTest.Models.ViewModels.NotificationViewModel
+
+@{
+    ViewBag.Title = "Index";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <meta charset="utf-8">
+    <title>Notifications</title>
+    <meta name="generator" content="Bootply" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link href="~/Static/css/bootstrap.min.css" rel="stylesheet">
+    <!--[if lt IE 9]>
+        <script src="//html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link href="~/Static/css/styles.css" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar navbar-default navbar-fixed-top" role="navigation">
+        <div class="collapse navbar-collapse">
+        </div>
+        
+    </nav>
+    <div class="container-fluid">
+        <!--left-->
+        <div class="col-sm-3">
+            <div id="projectItems"></div>
+        </div><!--/left-->
+        <!--center-->
+        <div class="col-sm-6">
+            <h1 id="mainHeading">Create a new notification</h1>
+            <div id="comment" class="row">
+                
+                <table>
+                    <tr>
+                        <td>To</td>
+                        <td><input id="to" type="text" /></td>
+                    </tr>
+                    <tr>
+                        <td>From</td>
+                        <td><input id="from" type="text" /></td>
+                    </tr>
+                    <tr>
+                        <td>Subject</td>
+                        <td><input id="subject" type="text" /></td>
+                    </tr>
+                    <tr>
+                        <td>Message</td>
+                        <td><textarea id="content" style="width:300px; height:100px;"></textarea></td>
+                    </tr>
+                    <tr>
+                        <td>Message</td>
+                        <td><select id="channels" /></td>
+                    </tr>
+                    <tr>
+                        <td>SendAt</td>
+                        <td><input type="datetime" id="sendat" /></td>
+                    </tr>
+                </table>
+                <button id="messagePost">Post</button>
+            </div>
+
+        </div><!--/center-->
+        <!--right-->
+        <div class="col-sm-3">
+            <h1>Messages</h1>
+            You have <strong><span id="currentCount">0</span></strong> new messages
+            <div id="fetch" class="row">Get <input type="text" value="5"> next messages<button id="fetchNext">Get</button></div>
+            <div id="messageContainer"></div>
+        </div>
+        <!--/right-->
+        <hr>
+    </div><!--/container-fluid-->
+    <!-- script references -->
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.2/jquery.min.js"></script>
+    <script src="~/Static/js/bootstrap.min.js"></script>
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+            console.log("setting up websocket");
+
+            var currentNumber = $("#currentCount");
+
+            var socket = new WebSocket("ws://" + window.location.hostname + ':' + window.location.port + "/websockets/notification");
+            socket.onmessage = function (event) {
+                console.log(event.data);
+                var data = JSON.parse(event.data);
+                currentNumber.val(data.count);
+            }
+        });
+
+
+
+        $("#messagePost")
+        .click(function () {
+            var message = $("#commentMessage")[0].value;
+            if (message) {
+                var projectId = $("#currentProject")[0].value;
+                $.ajax({
+                    url: '/api/projectapi/message/' + projectId,
+                    type: "POST",
+                    data: JSON.stringify(message),
+                    contentType: 'application/json; charset=utf-8',
+                    success: function (data, status, xhr) {
+                        $("#commentMessage").val('');
+                    },
+                    error: function (xhr, status, error) {
+                        alert(error);
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>
