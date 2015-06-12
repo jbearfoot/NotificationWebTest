@@ -9,5 +9,6 @@ namespace NotificationTest.Models.ViewModels
     public class NotificationViewModel
     {
         public IEnumerable<string> Channels { get; set; }
+        public string UserName { get; set; }
     }
 }

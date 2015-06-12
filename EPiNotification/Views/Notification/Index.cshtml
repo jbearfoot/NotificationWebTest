@@ -22,6 +22,7 @@
 <body>
     <nav class="navbar navbar-default navbar-fixed-top" role="navigation">
         <div class="collapse navbar-collapse">
+            Logged in as : @Model.UserName
         </div>
         
     </nav>
@@ -69,13 +70,14 @@
         <div class="col-sm-3">
             <h1>Messages</h1>
             You have <strong><span id="currentCount">0</span></strong> new messages
-            <div id="fetch" class="row">Get <input type="text" value="5"> next messages<button id="fetchNext">Get</button></div>
+            <div id="fetch" class="row">Get <input type="text" id="fetchCount" value="5"> next messages<button id="fetchNext">Get</button></div>
             <div id="messageContainer"></div>
         </div>
         <!--/right-->
         <hr>
     </div><!--/container-fluid-->
     <!-- script references -->
+    <input type="hidden" id="user" value="@Model.UserName" />
     <script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.2/jquery.min.js"></script>
     <script src="~/Static/js/bootstrap.min.js"></script>
 
@@ -95,25 +97,44 @@
 
 
 
-        $("#messagePost")
+        $("#fetchNext")
         .click(function () {
-            var message = $("#commentMessage")[0].value;
-            if (message) {
-                var projectId = $("#currentProject")[0].value;
-                $.ajax({
-                    url: '/api/projectapi/message/' + projectId,
-                    type: "POST",
-                    data: JSON.stringify(message),
-                    contentType: 'application/json; charset=utf-8',
-                    success: function (data, status, xhr) {
-                        $("#commentMessage").val('');
-                    },
-                    error: function (xhr, status, error) {
-                        alert(error);
-                    }
-                });
-            }
+            var number = $("#fetchCount")[0].value;
+            var user = $("#user")[0].value;
+            $.ajax({
+                url: '/api/notificationapi/messages/' + user + '/' + number,
+                type: "POST",
+                contentType: 'application/json; charset=utf-8',
+                success: function (data, status, xhr) {
+                    UpdateMessages(data);
+                },
+                error: function (xhr, status, error) {
+                    alert(error);
+                }
+            });
         });
+
+        function UpdateMessages(data) {
+            var jqueryContainer = $("#messageContainer");
+            var container = jqueryContainer[0];
+
+            //Clear old entries
+            while (container.hasChildNodes()) {
+                container.removeChild(container.lastChild);
+            }
+
+            displayMessages(data.entries, jqueryContainer);
+        }
+
+        function displayMessages(items, container) {
+            var index, commentIndex;
+            for (index = 0; index < items.length; ++index) {
+                var entry = '<div class="row" id=e' + items[index].id + '"><div class="col-xs-12"><h2>' + items[index].subject + '</h2><p>' +
+                    items[index].body + '</p><p><i>' + items[index].saved + '</i></p></div>' +
+                    '<div>(by: ' + items[index].author + ')</div>';
+                container.prepend(entry);
+            }
+        }
     </script>
 </body>
 </html>

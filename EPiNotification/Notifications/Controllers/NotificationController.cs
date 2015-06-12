@@ -21,7 +21,7 @@ namespace NotificationTest.Controllers
 
         public ActionResult Index()
         {
-            return View(new NotificationViewModel() { Channels = _channelNames });
+            return View(new NotificationViewModel() { Channels = _channelNames, UserName = HttpContext.User.Identity.Name });
         }
 
     }
