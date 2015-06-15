@@ -44,6 +44,12 @@ namespace NotificationTest.Controllers
             };
         }
 
+        [ActionName("markread")]
+        public async Task MarkAsRead(int id)
+        {
+            await _notifier.MarkAsReadAsync(id);
+        }
+
         [ActionName("notify")]
         public async Task Post([ModelBinder] NotificationMessageViewModel notificationMessage)
         {

@@ -133,9 +133,24 @@
             for (index = 0; index < items.length; ++index) {
                 var entry = '<div class="row" id=message_' + items[index].Id + '"><div class="col-xs-8"><h3>' + items[index].Subject + '</h3><p>' +
                     items[index].Content + '</p><p><i>' + items[index].Saved + '</i> (by: ' + items[index].Sender + ')</p></div>' +
-                    '<div class="col-xs-4"><div style="padding-top:2em">Mark as read   <input type="checkbox" /></div></div>';
+                    '<div class="col-xs-4"><div style="padding-top:2em">Mark as read   <input type="checkbox" id="chk_' +
+                    items[index].Id + '" /></div></div>';
                     
                 container.prepend(entry);
+                $('#chk_' + items[index].Id).click(function (e) {
+                    var id = e.target.id.substring(4,e.target.id.length);
+                    $.ajax({
+                        url: '/api/notificationapi/markread?id=' + id,
+                        type: "POST",
+                        contentType: 'application/json; charset=utf-8',
+                        success: function (data, status, xhr) {
+                            $('#replyMessage' + id).val('');
+                        },
+                        error: function (xhr, status, error) {
+                            alert(error);
+                        }
+                    });
+                });
             }
         }
     </script>

@@ -26,6 +26,10 @@ build/
 # Automatically generated ZIP
 EPiServer.Data/Resources/SqlUpdateScripts.zip
 
+#database
+*.mdf
+*.ldf
+
 *_i.c
 *_p.c
 *.ilk
