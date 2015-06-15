@@ -25,24 +25,10 @@ namespace NotificationTest.Controllers
         public IEnumerable<NotificationMessageViewModel> Get(string userName, int count)
         {
             int totalCount;
-            //return _notifier.GetUserNotifications(new UserNotificationsQuery() { Read = false, User = new NotificationUser() { UserName = userName } }, 1, count, out totalCount);
-
-            return new[]{ new NotificationMessageViewModel(){
-                Content = "this is some text",
-                Subject = "A message",
-                Saved = DateTime.Now.AddHours(-2).ToString("{yyyy/MM/dd H:mm:ss}"),
-                Id = 1,
-                Sender = "kalle"
-                }
-                , new NotificationMessageViewModel(){
-                Content = "this is some other text",
-                Subject = "Another message",
-                Saved = DateTime.Now.AddHours(-3).ToString("{yyyy/MM/dd H:mm:ss}"),
-                Id = 12,
-                Sender =  "bertil"
-                }
-            };
+            return _notifier.GetUserNotifications(new UserNotificationsQuery() { Read = false, User = new NotificationUser() { UserName = userName } }, 1, count, out totalCount)
+                .Select(u => CreateViewModel(u));
         }
+
 
         [ActionName("markread")]
         public async Task MarkAsRead(int id)
@@ -62,6 +48,20 @@ namespace NotificationTest.Controllers
                     Subject = notificationMessage.Subject,
                     TypeName = "UserMessage"
                 });
+        }
+
+        private NotificationMessageViewModel CreateViewModel(UserNotificationMessage u)
+        {
+            return new NotificationMessageViewModel()
+            {
+                Channel = u.ChannelName,
+                Content = u.Content,
+                Id = u.Id,
+                Recivier = u.Recipient.DisplayName ?? u.Recipient.UserName,
+                Saved = u.Notified.ToString("{yyyy/MM/dd H:mm:ss}"),
+                Sender = u.Sender.DisplayName ?? u.Sender.UserName,
+                Subject = u.Subject
+            };
         }
     }
 }
