@@ -42,7 +42,10 @@ namespace NotificationTest.HttpHandlers
         {
             _notifier = notifier;
             _notifier.MessageSaved += MessageSaved;
+            _notifier.UserMessageRead += MessageRead;
         }
+
+      
 
         internal async Task ProcessWebSocketRequest(AspNetWebSocketContext webSocketContext)
         {
@@ -64,6 +67,20 @@ namespace NotificationTest.HttpHandlers
             catch (Exception)
             {
                 Close();
+            }
+        }
+
+        private async void MessageRead(object sender, UserNotificationEventArgs e)
+        {
+            if (_webSocketContext.WebSocket.State != WebSocketState.Open)
+            {
+                await Close();
+                return;
+            }
+            var message = _notifier.GetUserNotification(e.MessageId);
+            if (message.Recipient.UserName.Equals(_webSocketContext.User.Identity.Name))
+            {
+                await SendCurrentNumberForUser(new NotificationUser() { UserName = message.Recipient.UserName });
             }
         }
 
@@ -95,6 +112,7 @@ namespace NotificationTest.HttpHandlers
         public async Task Close()
         {
             _notifier.MessageSaved -= MessageSaved;
+            _notifier.UserMessageRead -= MessageRead;
             if (_webSocketContext.WebSocket.State == WebSocketState.Open)
             {
                 await _webSocketContext.WebSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Closing connection", CancellationToken.None);
