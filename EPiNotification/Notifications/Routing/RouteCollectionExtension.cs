@@ -23,6 +23,12 @@ namespace NotificationTest.Routing
                 {
                     config.MapHttpAttributeRoutes();
 
+
+                    config.Routes.MapHttpRoute(
+                             name: "ControllerAndAction",
+                             routeTemplate: "api/{controller}/{action}/"
+                     );
+
                     config.Routes.MapHttpRoute(
                              name: "DefaultApi",
                              routeTemplate: "api/{controller}/{id}",
@@ -30,10 +36,11 @@ namespace NotificationTest.Routing
                      );
 
                     config.Routes.MapHttpRoute(
-                        name: "ControllerAndAction",
+                        name: "ControllerAndActionAndId",
                         routeTemplate: "api/{controller}/{action}/{id}/{startIndex}",
                         defaults: new { startIndex = 0 }
                     );
+                    
                 });
                               
         }

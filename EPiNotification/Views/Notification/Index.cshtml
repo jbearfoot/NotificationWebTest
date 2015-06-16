@@ -14,6 +14,8 @@
     <meta name="generator" content="Bootply" />
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
     <link href="~/Static/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
+
     <!--[if lt IE 9]>
         <script src="//html5shim.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
@@ -29,74 +31,89 @@
     <div class="container-fluid">
         <!--left-->
         <div class="col-sm-3">
-            <div id="projectItems"></div>
-        </div><!--/left-->
+            <h1>Users</h1>
+            <div id="fetch" class="row">Number of Users: <input type="text" id="numberofusers" value="5"> <button id="creatuser" onclick="createusers()">Create</button></div>
+        </div>
         <!--center-->
         <div class="col-sm-6">
             <h1 id="mainHeading">Create a new notification</h1>
             <div id="comment" class="row">
-                
-                <table>
-                    <tr>
-                        <td>To</td>
-                        <td><input id="to" type="text" /></td>
-                    </tr>
-                    <tr>
-                        <td>From</td>
-                        <td><input id="from" type="text" /></td>
-                    </tr>
-                    <tr>
-                        <td>Subject</td>
-                        <td><input id="subject" type="text" /></td>
-                    </tr>
-                    <tr>
-                        <td>Message</td>
-                        <td><textarea id="content" style="width:300px; height:100px;"></textarea></td>
-                    </tr>
-                    <tr>
-                        <td>Message</td>
-                        <td><select id="channels" /></td>
-                    </tr>
-                    <tr>
-                        <td>SendAt</td>
-                        <td><input type="datetime" id="sendat" /></td>
-                    </tr>
-                </table>
-                <button id="messagePost">Post</button>
+
+
+                @using (Html.BeginForm("notify", "api/notificationapi", FormMethod.Post, null))
+                {
+                    <table>
+                        <tr>
+                            <td>To</td>
+                            <td>
+                            @Html.TextBox("Recivier", null, new { id = "to" })
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>From</td>
+                            <td>
+                                @Html.TextBox("Sender", null, new { id = "from" })
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Subject</td>
+                            <td>
+                                @Html.TextBox("Subject", null, new { id = "subject" })
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Message</td>
+                            <td>
+                                @Html.TextArea("Content", null, new { id = "content" })
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Channel</td>
+                            <td>
+                                @Html.TextBox("Channel", "Channel", new { id = "channel" })
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>SendAt</td>
+                            <td>
+                                @Html.TextBox("SendAt", DateTime.UtcNow, new { id = "sendAt" })
+                            </td>
+                        </tr>
+                    </table>
+                    <button id="messagePost">Post</button>
+                }
             </div>
+        </div> 
 
-        </div><!--/center-->
-        <!--right-->
-        <div class="col-sm-3">
-            <h1>Messages</h1>
-            You have <strong><span id="currentCount">0</span></strong> new messages
-            <div id="fetch" class="row"><button id="fetchNext">Get</button> <input type="text" id="fetchCount" value="5"> next messages</div>
-            <div id="messageContainer"></div>
-        </div>
-        <!--/right-->
-        <hr>
+            <!--right-->
+            <div class="col-sm-3">
+                <h1>Messages</h1>
+                You have <strong><span id="currentCount">0</span></strong> new messages
+                <div id="fetch" class="row"><button id="fetchNext">Get</button> <input type="text" id="fetchCount" value="5"> next messages</div>
+                <div id="messageContainer"></div>
+            </div>
+            <!--/right-->
+            <hr>
 
 
-    </div><!--/container-fluid-->
+        </div><!--/container-fluid-->
     <!-- script references -->
     <input type="hidden" id="user" value="@Model.UserName" />
     <script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.2/jquery.min.js"></script>
     <script src="~/Static/js/bootstrap.min.js"></script>
+    <script src="http://code.jquery.com/jquery-1.9.1.js"></script>
+    <script src="http://code.jquery.com/ui/1.10.3/jquery-ui.js"></script>
 
     <script type="text/javascript">
         $(document).ready(function () {
             console.log("setting up websocket");
-
-            var currentNumber = $("#currentCount");
-
             var socket = new WebSocket("ws://" + window.location.hostname + ':' + window.location.port + "/websockets/notification");
             socket.onmessage = function (event) {
                 console.log(event.data);
                 var data = JSON.parse(event.data);
-                currentNumber.val(data.count);
+                $("#currentCount")[0].innerText = data.Count;
             }
         });
-
 
 
         $("#fetchNext")
@@ -153,6 +170,50 @@
                 });
             }
         }
+
+
+
+        function createusers() {
+            var nrofusers = $("#numberofusers")[0].value;
+            $.ajax(
+                   {
+                       url: "/api/notificationapi/createusers/?nrofusers=" + nrofusers,
+                       type: "POST",
+                       inData: {},
+                       contentType: 'application/json; charset=utf-8',
+                       success: function (data) {
+                       }
+                   });
+        }
+
+
+        $('#to, #from, #content').autocomplete({
+            source: function (request, response) {
+                $.ajax({
+                    url: "/api/notificationapi/findusers/?username=" + request.term,
+                    type: "POST",
+                    inData: {},
+                    contentType: 'application/json; charset=utf-8',
+                    data: {
+                        q: request.term
+                    },
+                    success: function (data) {
+                        response(data);
+                    }
+                });
+            },
+            minLength: 1,
+            select: function (event, ui) {
+                event.target = ui.item.label;
+            },
+            open: function () {
+                $(this).removeClass("ui-corner-all").addClass("ui-corner-top");
+            },
+            close: function () {
+                $(this).removeClass("ui-corner-top").addClass("ui-corner-all");
+            }
+        });
+
     </script>
 </body>
 </html>
