@@ -20,6 +20,11 @@
         <script src="//html5shim.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
     <link href="~/Static/css/styles.css" rel="stylesheet">
+    <style>
+        td {
+            padding: 5px;
+        }
+    </style>
 </head>
 <body>
     <nav class="navbar navbar-default navbar-fixed-top" role="navigation">
@@ -33,6 +38,7 @@
         <div class="col-sm-3">
             <h1>Users</h1>
             <div id="fetch" class="row">Number of Users: <input type="text" id="numberofusers" value="5"> <button id="creatuser" onclick="createusers()">Create</button></div>
+            <div>(Users will be created with a name "Userxxxx" where xxxx is a random number. Each user will have password "1234567")</div>
         </div>
         <!--center-->
         <div class="col-sm-6">
@@ -64,7 +70,7 @@
                         <tr>
                             <td>Message</td>
                             <td>
-                                @Html.TextArea("Content", null, new { id = "content" })
+                                @Html.TextArea("Content", null, new { id = "content", style = "width: 500px; height:200px;"} )
                             </td>
                         </tr>
                         <tr>
