@@ -46,12 +46,13 @@ namespace NotificationTest.Controllers
         {
             await _notifier.NotifyAsync(new NotificationMessage()
                 {
-                                        Sender = new NotificationUser { UserName = notificationMessage.Sender ?? "sender@test.se"},
+                    Sender = new NotificationUser { UserName = notificationMessage.Sender ?? "sender@test.se"},
                     Recipients = new[] { new NotificationUser { UserName = notificationMessage.Recivier ?? "receiver@test.se" } },
                     ChannelName = notificationMessage.Channel ?? "channelName",
                     Content = notificationMessage.Content ?? "content",
                     Subject = notificationMessage.Subject ?? "subject",
-                    TypeName = "UserMessage"
+                    TypeName = "UserMessage",
+                    SendAt = notificationMessage.SendAt
                 });
         }
 
