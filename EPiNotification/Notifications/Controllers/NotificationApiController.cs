@@ -32,6 +32,19 @@ namespace NotificationTest.Controllers
                 .Select(u => CreateViewModel(u));
         }
 
+        [ActionName("getchannles")]
+        public IEnumerable<System.Web.Mvc.SelectListItem> getchannles()
+        {
+            foreach (var f in ServiceLocator.Current.GetAllInstances<INotificationFormatter>())
+            {
+                foreach (var c in f.SupportedChannelNames)
+                {
+                    yield return new System.Web.Mvc.SelectListItem() { Text = c, Value = c };
+                }
+            }
+        }
+
+
 
         [ActionName("markread")]
         [HttpPost]

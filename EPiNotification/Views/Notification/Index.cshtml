@@ -76,7 +76,7 @@
                         <tr>
                             <td>Channel</td>
                             <td>
-                                @Html.TextBox("Channel", "Channel", new { id = "channel" })
+                                @Html.DropDownList("Channel", new SelectListItem[] { })
                             </td>
                         </tr>
                         <tr>
@@ -119,6 +119,22 @@
                 var data = JSON.parse(event.data);
                 $("#currentCount")[0].innerText = data.Count;
             }
+
+            $.ajax({
+                url: '/api/notificationapi/getchannles',
+                type: "GET",
+                contentType: 'application/json; charset=utf-8',
+                success: function (data, status, xhr) {
+                   
+                    $.each(data, function (val, text) {
+                        $("#Channel").append(new Option(text.Text, text.Text))
+                    });
+                },
+                error: function (xhr, status, error) {
+                    alert(error);
+                }
+            });
+
         });
 
 

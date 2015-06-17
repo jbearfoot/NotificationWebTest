@@ -314,6 +314,7 @@
     <Compile Include="Notifications\Models\NotificationUser.cs" />
     <Compile Include="Notifications\Models\ViewModels\NotificationMessageViewModel.cs" />
     <Compile Include="Notifications\Models\ViewModels\NotificationViewModel.cs" />
+    <Compile Include="Notifications\NotificationFormatter\DefaultNotificationFormatter.cs" />
     <Compile Include="Notifications\Routing\RouteCollectionExtension.cs" />
     <Compile Include="Notifications\Routing\WebSocketRoute.cs" />
     <Compile Include="Notifications\Routing\WebSocketRouteHandler.cs" />
