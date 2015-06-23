@@ -1,0 +1,109 @@
+﻿@model EPiNotification.Models.ViewModels.TasksViewModel
+
+@{
+    ViewBag.Title = "Index";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <meta charset="utf-8">
+    <title>Tasks</title>
+    <meta name="generator" content="Bootply" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link href="~/Static/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
+
+    <!--[if lt IE 9]>
+        <script src="//html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link href="~/Static/css/styles.css" rel="stylesheet">
+    <style>
+        td {
+            padding: 5px;
+        }
+    </style>
+    <script type="text/javascript">
+
+        function DeleteTask(id) {
+            $.ajax({
+                url: '/api/notificationapi/task?id=' + id,
+                type: "POST",
+                contentType: 'application/json; charset=utf-8',
+                success: function (data, status, xhr) {
+                    location.reload(true);
+                },
+                error: function (xhr, status, error) {
+                    alert(error);
+                }
+            });
+        }
+    </script>
+</head>
+<body>
+    <nav class="navbar navbar-default navbar-fixed-top" role="navigation">
+        <div class="collapse navbar-collapse">
+            Logged in as : @Model.UserName
+        </div>
+        
+    </nav>
+    <div class="container-fluid">
+        <!--left-->
+        <div class="col-sm-3">
+        </div>
+        <!--center-->
+        <div class="col-sm-6">
+            <h1 id="mainHeading">Tasks</h1>
+            <div id="comment" class="row">
+                @foreach(var task in Model.Tasks)
+                {
+                    <table>
+                        <tr>
+                            <td>From</td>
+                            <td>
+                                @Html.TextBox("Sender", task.Owner, new { id = "from", @readonly=true })
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Subject</td>
+                            <td>
+                                @Html.TextBox("Subject", task.Subject, new { id = "subject" , @readonly=true})
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Message</td>
+                            <td>
+                                @Html.TextArea("Content", task.Description, new { id = "content", @readonly=true, style = "width: 500px; height:200px; enabled:false"} )
+                            </td>
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td><button onclick=DeleteTask(@task.TaskID)>Delete</button></td>
+                        </tr>
+                    </table>
+                    <br/>
+                }
+            </div>
+        </div> 
+
+            <!--right-->
+            <div class="col-sm-3">
+               
+            </div>
+            <!--/right-->
+            <hr>
+
+
+        </div><!--/container-fluid-->
+    <!-- script references -->
+    <input type="hidden" id="user" value="@Model.UserName" />
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.2/jquery.min.js"></script>
+    <script src="~/Static/js/bootstrap.min.js"></script>
+    <script src="http://code.jquery.com/jquery-1.9.1.js"></script>
+    <script src="http://code.jquery.com/ui/1.10.3/jquery-ui.js"></script>
+
+
+</body>
+</html>

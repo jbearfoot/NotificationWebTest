@@ -1,4 +1,4 @@
-﻿using EPiServer.Editor.Notification;
+﻿using EPiServer.Notification;
 using EPiServer.ServiceLocation;
 using Newtonsoft.Json;
 using NotificationTest.Models;
@@ -27,7 +27,7 @@ namespace NotificationTest.HttpHandlers
         {
             if (context.IsWebSocketRequest)
             {
-                var hub = new NotificationHub(ServiceLocator.Current.GetInstance<INotifier>());
+                var hub = new NotificationHub(ServiceLocator.Current.GetInstance<INotifier>(), ServiceLocator.Current.GetInstance<IUserNotificationRepository>());
                 context.AcceptWebSocketRequest(hub.ProcessWebSocketRequest);
             }
         }
@@ -36,13 +36,15 @@ namespace NotificationTest.HttpHandlers
     public class NotificationHub
     {
         private INotifier _notifier;
+        private IUserNotificationRepository _userNotifications;
         AspNetWebSocketContext _webSocketContext;
 
-        public NotificationHub(INotifier notifier)
+        public NotificationHub(INotifier notifier, IUserNotificationRepository userNotifications)
         {
+            _userNotifications = userNotifications;
             _notifier = notifier;
-            _notifier.MessageSaved += MessageSaved;
-            _notifier.UserMessageRead += MessageRead;
+            _notifier.NotificationSaved += MessageSaved;
+            _userNotifications.UserNotificationRead += MessageRead;
         }
 
       
@@ -50,7 +52,7 @@ namespace NotificationTest.HttpHandlers
         internal async Task ProcessWebSocketRequest(AspNetWebSocketContext webSocketContext)
         {
             _webSocketContext = webSocketContext;
-            await SendCurrentNumberForUser(new NotificationUser() { UserName = _webSocketContext.User.Identity.Name });
+            await SendCurrentNumberForUser(new NotificationUser(_webSocketContext.User.Identity.Name));
             try
             {
                 var inputBuffer = new ArraySegment<byte>(new byte[1024]);
@@ -77,10 +79,10 @@ namespace NotificationTest.HttpHandlers
                 await Close();
                 return;
             }
-            var message = _notifier.GetUserNotification(e.MessageId);
+            var message = _userNotifications.GetUserNotification(e.MessageId);
             if (message.Recipient.UserName.Equals(_webSocketContext.User.Identity.Name))
             {
-                await SendCurrentNumberForUser(new NotificationUser() { UserName = message.Recipient.UserName });
+                await SendCurrentNumberForUser(new NotificationUser(message.Recipient.UserName));
             }
         }
 
@@ -101,7 +103,7 @@ namespace NotificationTest.HttpHandlers
 
         private async Task SendCurrentNumberForUser(INotificationUser user)
         {
-            var anonymus = new { Count = _notifier.GetUserNotificationsCount(new UserNotificationsQuery() { User = user, Read = false }) };
+            var anonymus = new { Count = _userNotifications.GetUserNotificationsCount(new UserNotificationsQuery() { User = user, Read = false }) };
 
             var json = JsonConvert.SerializeObject(anonymus);
             var output = new ArraySegment<byte>(Encoding.UTF8.GetBytes(json));
@@ -111,8 +113,8 @@ namespace NotificationTest.HttpHandlers
 
         public async Task Close()
         {
-            _notifier.MessageSaved -= MessageSaved;
-            _notifier.UserMessageRead -= MessageRead;
+            _notifier.NotificationSaved -= MessageSaved;
+            _userNotifications.UserNotificationRead -= MessageRead;
             if (_webSocketContext.WebSocket.State == WebSocketState.Open)
             {
                 await _webSocketContext.WebSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Closing connection", CancellationToken.None);

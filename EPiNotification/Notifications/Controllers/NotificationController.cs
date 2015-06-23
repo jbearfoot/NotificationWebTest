@@ -1,4 +1,4 @@
-﻿using EPiServer.Editor.Notification;
+﻿using EPiServer.Notification;
 using EPiServer.ServiceLocation;
 using NotificationTest.Models.ViewModels;
 using System;

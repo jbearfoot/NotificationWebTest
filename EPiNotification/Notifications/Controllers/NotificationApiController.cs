@@ -1,4 +1,5 @@
-﻿using EPiServer.Editor.Notification;
+﻿using EPiServer.DataAccess;
+using EPiServer.Notification;
 using EPiServer.Security;
 using EPiServer.ServiceLocation;
 using NotificationTest.Models;
@@ -17,18 +18,20 @@ namespace NotificationTest.Controllers
     public class NotificationApiController : ApiController
     {
         private INotifier _notifier;
+        private IUserNotificationRepository _userNotifications;
         private static object _lock = new object();
 
         public NotificationApiController()
         {
             _notifier = ServiceLocator.Current.GetInstance<INotifier>();
+            _userNotifications = ServiceLocator.Current.GetInstance<IUserNotificationRepository>();
         }
 
         [ActionName("messages")]
         public IEnumerable<NotificationMessageViewModel> Get(string userName, int count)
         {
             int totalCount;
-            return _notifier.GetUserNotifications(new UserNotificationsQuery() { Read = false, User = new NotificationUser() { UserName = userName } }, 1, count, out totalCount)
+            return _userNotifications.GetUserNotifications(new UserNotificationsQuery() { Read = false, User = new NotificationUser(userName) }, 1, count, out totalCount)
                 .Select(u => CreateViewModel(u));
         }
 
@@ -50,17 +53,17 @@ namespace NotificationTest.Controllers
         [HttpPost]
         public async Task MarkAsRead(int id)
         {
-            await _notifier.MarkAsReadAsync(id);
+            await _userNotifications.MarkUserNotificationAsReadAsync(id);
         }
 
         [ActionName("notify")]
         [HttpPost]
         public async Task Notify(NotificationMessageViewModel notificationMessage)
         {
-            await _notifier.NotifyAsync(new NotificationMessage()
+            await _notifier.PostNotificationAsync(new NotificationMessage()
                 {
-                    Sender = new NotificationUser { UserName = notificationMessage.Sender ?? "sender@test.se"},
-                    Recipients = new[] { new NotificationUser { UserName = notificationMessage.Recivier ?? "receiver@test.se" } },
+                    Sender = new NotificationUser(notificationMessage.Sender ?? "sender@test.se"),
+                    Recipients = new[] { new NotificationUser(notificationMessage.Recivier ?? "receiver@test.se" ) },
                     ChannelName = notificationMessage.Channel ?? "channelName",
                     Content = notificationMessage.Content ?? "content",
                     Subject = notificationMessage.Subject ?? "subject",
@@ -97,6 +100,13 @@ namespace NotificationTest.Controllers
                     }
                 };
             }
+        }
+
+        [HttpPost]
+        [ActionName("task")]
+        public void CreateUsers(int id)
+        {
+            ServiceLocator.Current.GetInstance<TaskDB>().Delete(id);
         }
 
         private NotificationMessageViewModel CreateViewModel(UserNotificationMessage u)
