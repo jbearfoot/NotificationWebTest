@@ -19,7 +19,7 @@ namespace EPiNotification.Notifications.NotificationProvider
 
         public NotificationFormat GetProviderFormat()
         {
-            return new NotificationFormat() { IsUserNotification = false, SupportsHtml = true };
+            return new NotificationFormat() { SupportsHtml = true};
         }
 
 

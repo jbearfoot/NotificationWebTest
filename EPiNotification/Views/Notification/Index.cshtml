@@ -210,7 +210,7 @@
         }
 
 
-        $('#to, #from, #content').autocomplete({
+        $('#to, #from').autocomplete({
             source: function (request, response) {
                 $.ajax({
                     url: "/api/notificationapi/findusers/?username=" + request.term,
